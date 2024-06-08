@@ -24,7 +24,7 @@ const ProjectItem = (props: projectItemProps) => {
           <div className="flex flex-col">
             <p className="heading-text font-semibold">{props.name}</p>
             <div className="flex flex-row items-center text-xs text-slate-500 space-x-1 font-medium">
-              <p className="">{renderProductNumber()}</p>
+              <div className="">{renderProductNumber()}</div>
               <p className="text-md">&bull;</p>
               <p
                 className={

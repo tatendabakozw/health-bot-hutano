@@ -3,6 +3,7 @@ import {
   getFromLocalStorage,
   setLocalStorageItem,
 } from "@/helpers/localStorageMethods";
+import Cookies from "js-cookie";
 
 const initialState = {
   darkMode: false,
@@ -12,6 +13,10 @@ const initialState = {
   cart: {
     cartItems: [],
   },
+  userInfo: Cookies.get("userInfo")
+    ? // @ts-ingore
+      JSON.parse(Cookies.get("userInfo"))
+    : null,
 };
 
 // @ts-ignore
@@ -41,12 +46,8 @@ function reducer(state: any, action: { type: any; payload: any }) {
       return { ...state, cart: { ...state.cart, cartItems: NewcartItems } };
 
     case "USER_LOGIN":
-      setLocalStorageItem("access_token", action.payload.access_token);
-      setLocalStorageItem("refresh_token", action.payload.refresh_token);
       return { ...state, userInfo: action.payload };
     case "USER_LOGOUT":
-      setLocalStorageItem("access_token", null);
-      setLocalStorageItem("refresh_token", null);
       return { ...state, userInfo: null, cart: { cartItems: [] } };
     case "SET_SEARCH_QUERY":
       return { ...state, search_query: action.payload };

@@ -117,7 +117,7 @@ const Overview = (props: Props) => {
                   status={item.status}
                 />
               ))}
-              <Clock />
+              {/* <Clock /> */}
             </div>
             {/* producgts table */}
             <ProductsTable />

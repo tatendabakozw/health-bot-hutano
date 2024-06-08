@@ -1,12 +1,38 @@
 import { useFetch } from "@/hooks/useFetch";
 import { apiUrl } from "@/utils/apiUrl";
 import { PencilIcon, TrashIcon } from "@heroicons/react/16/solid";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import DeleteModal from "../modals/DeleteModal";
+import axios from "axios";
 
 type Props = {};
 
 const ProductsTable = (props: Props) => {
   const response = useFetch(`${apiUrl}/product/all`);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setProducts(response?.data?.products);
+  }, [response?.data?.products]);
+
+  const deleteItem = async (itemToRemove: any) => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(
+        `${apiUrl}/product/delete/?item=${itemToRemove._id}`
+      );
+      setProducts((prevItems) =>
+        prevItems.filter((item: any) => item._id !== itemToRemove._id)
+      );
+      setLoading(false);
+
+      console.log("delte item");
+    } catch (error) {
+      console.log("deleye item");
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-primary flex flex-col main-border gap-4 p-4 space-y-2 rounded-lg">
@@ -26,7 +52,7 @@ const ProductsTable = (props: Props) => {
             <div className="col-span-1">Quantity</div>
             <div className="col-span-1">Price</div>
           </div>
-          {response?.data?.products?.map((item: any) => (
+          {products?.map((item: any) => (
             <div
               key={item.sku}
               className="grid grid-cols-5 text-sm text-zinc-700s"
@@ -36,8 +62,8 @@ const ProductsTable = (props: Props) => {
               <div className="col-span-1">{item.quantity}</div>
               <div className="col-span-1">{item.price}</div>
               <div className="col-span-1 flex flex-row items-center space-x-4">
-                <TrashIcon height={16} width={16} />
-                <PencilIcon height={16} width={16} />
+                <DeleteModal onClick={() => deleteItem(item)} />
+                {/* <PencilIcon height={16} width={16} /> */}
               </div>
             </div>
           ))}
