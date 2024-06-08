@@ -1,11 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Head from "next/head";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import ChatHistoryModal from "@/components/modals/ChatHistoryModal";
 import axios from "axios";
 import ThemeToggler from "@/components/buttons/ThemeToggle";
 import { Store } from "@/context/Store";
+import { useRouter } from "next/router";
+import { generateRandomId } from "@/utils/generateRandomID";
+import { useFetch } from "@/hooks/useFetch";
 
 const apiUrl = `https://z94ka3s1dsuof4va.us-east-1.aws.endpoints.huggingface.cloud`;
 
@@ -17,6 +20,31 @@ export function Index() {
   const { dispatch, state } = useContext<any>(Store);
   const { userInfo } = state;
 
+  const router = useRouter();
+  const { query } = router;
+  useEffect(() => {
+    const { query } = router;
+    if (!query.id) {
+      const randomId = generateRandomId();
+      router.replace({
+        pathname: router.pathname,
+        query: { ...query, id: randomId },
+      });
+    }
+  }, [router]);
+
+  const response = useFetch(
+    `http://localhost:7000/message/all/?id=${query.id}`
+  );
+
+  useEffect(() => {
+    if (response.data) {
+      setMessages(response.data.messages);
+    }
+  }, [response.data]);
+
+  console.log("response from server: ", messages);
+
   const send_message = async () => {
     if (!message.trim()) return; // Prevent sending empty messages
 
@@ -24,10 +52,10 @@ export function Index() {
     try {
       setMessages((prevMessages: any) => [
         ...prevMessages,
-        { message, sendBy: "me" },
+        { user_message: message, sentBy: "me" },
       ]);
 
-      const { data } = await axios.post(apiUrl, {
+      const { data: bot_data } = await axios.post(apiUrl, {
         inputs: message,
         parameters: {
           max_new_tokens: 512,
@@ -36,16 +64,22 @@ export function Index() {
         },
       });
 
-      await axios.post(`http://localhost:7000/message/create`, {
-        user_id: userInfo._id,
-        user_message: message,
-        bot_message: data[0].generated_text,
-        chat_id: "",
-      });
+      const { data } = await axios.post(
+        `http://localhost:7000/message/create`,
+        {
+          user_id: userInfo._id,
+          user_message: message,
+          bot_message: bot_data[0].generated_text,
+          chat_id: query.id,
+        }
+      );
+
+      // console.log(data);
+      setLoading(false);
 
       setMessages((prevMessages: any) => [
         ...prevMessages,
-        { message: data[0].generated_text, sendBy: "bot" },
+        { bot_message: data.message.bot_message, sentBy: "bot" },
       ]);
       setMessage("");
     } catch (error) {
@@ -75,22 +109,25 @@ export function Index() {
               <div className="flex-1"></div>
 
               {messages?.map((item: any, index: number) => (
-                <div
-                  key={index}
-                  className={`${
-                    item.sendBy === "me" ? "self-end " : "self-start "
-                  } flex max-w-md`}
-                >
-                  <p
-                    className={`${
-                      item.sendBy === "bot"
-                        ? "bg-blue-700 text-white  "
-                        : "bg-secondary "
-                    } text-sm font-medium py-1 px-2 rounded-xl`}
-                  >
-                    {item.message}
-                  </p>
-                </div>
+                <>
+                  {item.sentBy === "me" ? (
+                    <div key={index} className={`flex max-w-md self-end `}>
+                      <p
+                        className={`text-sm font-medium py-1 px-2 rounded-xl bg-blue-700 text-white`}
+                      >
+                        {item.user_message}
+                      </p>
+                    </div>
+                  ) : (
+                    <div key={index} className={` flex max-w-md self-start`}>
+                      <p
+                        className={`text-sm font-medium py-1 px-2 bg-secondary  rounded-xl`}
+                      >
+                        {item.bot_message}
+                      </p>
+                    </div>
+                  )}
+                </>
               ))}
               {loading && (
                 <div className="flex">
