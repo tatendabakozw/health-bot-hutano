@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unescaped-entities */
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Head from "next/head";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import ChatHistoryModal from "@/components/modals/ChatHistoryModal";
 import axios from "axios";
 import ThemeToggler from "@/components/buttons/ThemeToggle";
+import { Store } from "@/context/Store";
 
 const apiUrl = `https://z94ka3s1dsuof4va.us-east-1.aws.endpoints.huggingface.cloud`;
 
@@ -13,6 +14,8 @@ export function Index() {
   const [err, setErr] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any>([]);
+  const { dispatch, state } = useContext<any>(Store);
+  const { userInfo } = state;
 
   const send_message = async () => {
     if (!message.trim()) return; // Prevent sending empty messages
@@ -31,6 +34,13 @@ export function Index() {
           return_full_text: false,
           clean_up_tokenization_spaces: true,
         },
+      });
+
+      await axios.post(`http://localhost:7000/message/create`, {
+        user_id: userInfo._id,
+        user_message: message,
+        bot_message: data[0].generated_text,
+        chat_id: "",
       });
 
       setMessages((prevMessages: any) => [
@@ -55,7 +65,7 @@ export function Index() {
         <div className="max-w-7xl w-full bg-primary mx-auto h-full flex flex-col flex-1 p-4 relative rounded-lg ">
           <div className="flex-1 flex flex-col">
             <div className="flex flex-row items-center justify-between space-x-4">
-              <div className="text-zinc-950 font-bold text-3xl flex-1">
+              <div className="heading-text font-bold text-3xl flex-1">
                 Hutano
               </div>
               <ThemeToggler />
