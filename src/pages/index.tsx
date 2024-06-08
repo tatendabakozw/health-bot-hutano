@@ -9,6 +9,8 @@ import { Store } from "@/context/Store";
 import { useRouter } from "next/router";
 import { generateRandomId } from "@/utils/generateRandomID";
 import { useFetch } from "@/hooks/useFetch";
+import { ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 
 const apiUrl = `https://z94ka3s1dsuof4va.us-east-1.aws.endpoints.huggingface.cloud`;
 
@@ -20,8 +22,13 @@ export function Index() {
   const { dispatch, state } = useContext<any>(Store);
   const { userInfo } = state;
 
+  const logoutUser = () => {
+    dispatch({ type: "USER_LOGOUT" });
+  };
+
   const router = useRouter();
   const { query } = router;
+
   useEffect(() => {
     const { query } = router;
     if (!query.id) {
@@ -74,7 +81,6 @@ export function Index() {
         }
       );
 
-      // console.log(data);
       setLoading(false);
 
       setMessages((prevMessages: any) => [
@@ -99,14 +105,49 @@ export function Index() {
         <div className="max-w-7xl w-full bg-primary mx-auto h-full flex flex-col flex-1 p-4 relative rounded-lg ">
           <div className="flex-1 flex flex-col">
             <div className="flex flex-row items-center justify-between space-x-4">
-              <div className="heading-text font-bold text-3xl flex-1">
-                Hutano
+              <div className="heading-text font-bold text-3xl flex-1 flex flex-row space-x-4">
+                <div className="flex h-8 w-8 relative">
+                  <Image src={"/health-logo.png"} alt="health logo" fill />
+                </div>
+                <p>Hutano</p>
               </div>
               <ThemeToggler />
               <ChatHistoryModal />
+              {userInfo ? (
+                <span
+                  onClick={logoutUser}
+                  className="bg-secondary p-1 rounded-full cursor-pointer"
+                >
+                  <ArrowRightEndOnRectangleIcon height={16} width={16} />
+                </span>
+              ) : null}
             </div>
             <div className="flex flex-col h-full flex-1 w-full space-y-1 pb-4">
-              <div className="flex-1"></div>
+              <div className="flex-1 grid items-center content-center justify-center space-y-8 w-full">
+                <div className="h-40 w-40 relative mx-auto">
+                  <Image src={"/health-logo.png"} alt="health logo" fill />
+                </div>
+                <div className="flex flex-row items-center gap-4 max-w-xl w-full mx-auto">
+                  <div
+                    onClick={() => setMessage("What is malaria?")}
+                    className="flex p-4 main-border rounded-xl cursor-pointer hover:bg-secondary"
+                  >
+                    What is malaria?
+                  </div>
+                  <div
+                    onClick={() => setMessage("How to cure typhoid?")}
+                    className="flex p-4 main-border rounded-xl cursor-pointer hover:bg-secondary"
+                  >
+                    How to cure typhoid?
+                  </div>
+                  <div
+                    onClick={() => setMessage("What is cholera?")}
+                    className="flex p-4 main-border rounded-xl cursor-pointer hover:bg-secondary"
+                  >
+                    What is cholera?
+                  </div>
+                </div>
+              </div>
 
               {messages?.map((item: any, index: number) => (
                 <>
@@ -138,7 +179,7 @@ export function Index() {
               )}
             </div>
           </div>
-          <div className="flex bg-secondary rounded-full px-4 bottom-0">
+          <div className="flex bg-secondary rounded-full px-4 bottom-0 flex-row items-center">
             <input
               type="text"
               value={message}
@@ -146,11 +187,11 @@ export function Index() {
               className="bg-secondary py-2 px-4 flex-1 outline-none rounded-full"
               placeholder="Enter message"
             />
-            <button
+            <div
               onClick={loading ? () => console.log("loading...") : send_message}
             >
               <PaperAirplaneIcon height={16} width={16} />
-            </button>
+            </div>
           </div>
         </div>
       </div>
