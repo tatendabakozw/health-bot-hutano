@@ -1,14 +1,8 @@
 import { createContext, useReducer } from "react";
-import {
-  getFromLocalStorage,
-  setLocalStorageItem,
-} from "@/helpers/localStorageMethods";
 import Cookies from "js-cookie";
 
 const initialState = {
   darkMode: false,
-  access_token: getFromLocalStorage("access_token"),
-  refresh_token: getFromLocalStorage("refresh_token"),
   search_query: "",
   cart: {
     cartItems: [],
@@ -46,6 +40,7 @@ function reducer(state: any, action: { type: any; payload: any }) {
       return { ...state, cart: { ...state.cart, cartItems: NewcartItems } };
 
     case "USER_LOGIN":
+      Cookies.set("userInfo", JSON.stringify(action.payload));
       return { ...state, userInfo: action.payload };
     case "USER_LOGOUT":
       return { ...state, userInfo: null, cart: { cartItems: [] } };

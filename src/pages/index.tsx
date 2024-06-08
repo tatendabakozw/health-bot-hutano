@@ -4,6 +4,7 @@ import Head from "next/head";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import ChatHistoryModal from "@/components/modals/ChatHistoryModal";
 import axios from "axios";
+import ThemeToggler from "@/components/buttons/ThemeToggle";
 
 const apiUrl = `https://z94ka3s1dsuof4va.us-east-1.aws.endpoints.huggingface.cloud`;
 
@@ -53,8 +54,11 @@ export function Index() {
       <div className="min-h-screen bg-secondary w-full py-4 flex flex-col ">
         <div className="max-w-7xl w-full bg-primary mx-auto h-full flex flex-col flex-1 p-4 relative rounded-lg ">
           <div className="flex-1 flex flex-col">
-            <div className="flex flex-row items-center justify-between">
-              <div className="text-zinc-950 font-bold text-3xl">Hutano</div>
+            <div className="flex flex-row items-center justify-between space-x-4">
+              <div className="text-zinc-950 font-bold text-3xl flex-1">
+                Hutano
+              </div>
+              <ThemeToggler />
               <ChatHistoryModal />
             </div>
             <div className="flex flex-col h-full flex-1 w-full space-y-1 pb-4">
